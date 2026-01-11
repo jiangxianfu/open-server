@@ -39,7 +39,8 @@ function testServer() {
 }
 
 // Start the server temporarily for testing
-const server = require('./server.js');
+const { startServer } = require('./server.js');
+const server = startServer();
 
 setTimeout(async () => {
   try {
