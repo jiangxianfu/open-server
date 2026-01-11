@@ -1,0 +1,114 @@
+# 私有化部署的 Hasura v3 Docker Compose 配置  
+# 所有组件都在本地运行，不依赖外部服务  
+  
+version: '3.8'  
+  
+services:  
+  # Hasura Engine 核心服务  
+  engine:
+    image: hasura/graphql-engine:v3
+    environment:  
+      - METADATA_PATH=app/metadata.json  
+      - AUTHN_CONFIG_PATH=app/auth_config.json  
+      - OTLP_ENDPOINT=http://jaeger:4317  
+      - RUST_LOG=info  
+    ports:  
+      - "3000:3000"  # GraphQL API 端口  
+    depends_on:  
+      postgres:  
+        condition: service_healthy  
+      postgres_connector:  
+        condition: service_started  
+      auth_hook:  
+        condition: service_started  
+    volumes:  
+      # 本地认证配置文件 - 使用 no-auth 模式  
+      - ./static/auth/noauth_config_v3.json:/app/auth_config.json  
+      # 本地元数据配置  
+      - ./static/metadata.json:/app/metadata.json  
+    networks:  
+      - hasura-network  
+  
+  # PostgreSQL 数据库  
+  postgres:  
+    image: postgis/postgis:16-3.4  
+    platform: linux/amd64  
+    restart: always  
+    environment:  
+      POSTGRES_PASSWORD: "your_secure_password"  
+      POSTGRES_DB: "hasura"  
+      POSTGRES_USER: "hasura"  
+    ports:  
+      - "5432:5432"  
+    volumes:  
+      - postgres_data:/var/lib/postgresql/data  
+      # 初始化数据库脚本  
+      - ./init-scripts:/docker-entrypoint-initdb.d  
+    healthcheck:  
+      test: ["CMD-SHELL", "pg_isready -U hasura"]  
+      interval: 10s  
+      timeout: 5s  
+      retries: 5  
+    networks:  
+      - hasura-network  
+  
+  # 本地认证 Webhook 服务  
+  auth_hook:  
+    image: auth-webhook:dev
+    environment:  
+      RUST_LOG: debug  
+      # 本地配置，无需外部依赖  
+      AUTH_MODE: "local"  
+    ports:  
+      - "3050:3050"  
+    networks:  
+      - hasura-network  
+  
+  # PostgreSQL NDC 连接器  
+  postgres_connector:  
+    image: ghcr.io/hasura/ndc-postgres:dev-main  
+    environment:  
+      CONNECTION_URI: "postgresql://hasura:your_secure_password@postgres:5432/hasura"  
+      RUST_LOG: info  
+      OTEL_SERVICE_NAME: "ndc-postgres"  
+    ports:  
+      - "8080:8080"  
+    depends_on:  
+      postgres:  
+        condition: service_healthy  
+    volumes:  
+      - ./connector-configs:/etc/connector  
+    networks:  
+      - hasura-network  
+  
+  # Jaeger 追踪服务（可选，用于调试）  
+  jaeger:  
+    image: jaegertracing/all-in-one:1.55  
+    restart: always  
+    ports:  
+      - "16686:16686"  # Jaeger UI  
+      - "4317:4317"    # OTLP gRPC  
+      - "4318:4318"    # OTLP HTTP  
+    environment:  
+      COLLECTOR_OTLP_ENABLED: "true"  
+    networks:  
+      - hasura-network  
+  
+  # Redis 缓存服务（可选）  
+  redis:  
+    image: redis:7-alpine  
+    restart: always  
+    ports:  
+      - "6379:6379"  
+    volumes:  
+      - redis_data:/data  
+    networks:  
+      - hasura-network  
+  
+volumes:  
+  postgres_data:  
+  redis_data:  
+  
+networks:  
+  hasura-network:  
+    driver: bridge
