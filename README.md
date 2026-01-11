@@ -1,12 +1,29 @@
-# open-server
+# Open Server
 
-### Push images
-```
-export GITHUB_PUSTH_TOKEN="xxx"
-echo $GITHUB_PUSTH_TOKEN | docker login ghcr.io -u your-github-username --password-stdin
+Development environment for building Docker images and testing open-source applications.
+
+## Prerequisites
+
+- Docker
+- Git
+- GitHub account with access to GitHub Container Registry (ghcr.io)
+
+## Push Images to GitHub Container Registry
+
+First, create a [Personal Access Token](https://github.com/settings/tokens/new) with `write:packages` permission.
+
+```bash
+# Set your GitHub Personal Access Token
+export GITHUB_PUSH_TOKEN="your_personal_access_token_here"
+
+# Login to GitHub Container Registry
+echo $GITHUB_PUSH_TOKEN | docker login ghcr.io -u your-github-username --password-stdin
+
+# Push your images
+docker push ghcr.io/your-github-username/image-name:tag
 ```
 
-Open Server
+## Hasura V3 Engine Setup
 
 ### Git checkout with only Hasura V3 engine code
 
