@@ -1,0 +1,16 @@
+{
+  "name": "open-server",
+  "version": "1.0.0",
+  "description": "A simple open HTTP server",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node test.js"
+  },
+  "keywords": [
+    "server",
+    "http"
+  ],
+  "author": "",
+  "license": "MIT"
+}
