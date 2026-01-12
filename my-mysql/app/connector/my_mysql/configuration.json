@@ -1,0 +1,46 @@
+{
+  "jdbcUrl" : {
+    "variable" : "JDBC_URL"
+  },
+  "jdbcProperties" : {
+    "allowMultiQueries" : "true"
+  },
+  "schemas" : [ ],
+  "tables" : [ {
+    "tableName" : "users",
+    "tableType" : "TABLE",
+    "description" : "",
+    "columns" : [ {
+      "name" : "id",
+      "description" : "",
+      "type" : "int",
+      "numeric_precision" : 10,
+      "numeric_scale" : 0,
+      "nullable" : false,
+      "auto_increment" : true,
+      "is_primarykey" : true
+    }, {
+      "name" : "name",
+      "description" : "",
+      "type" : "varchar",
+      "numeric_precision" : null,
+      "numeric_scale" : null,
+      "nullable" : false,
+      "auto_increment" : false,
+      "is_primarykey" : false
+    }, {
+      "name" : "age",
+      "description" : "",
+      "type" : "int",
+      "numeric_precision" : 10,
+      "numeric_scale" : 0,
+      "nullable" : false,
+      "auto_increment" : false,
+      "is_primarykey" : false
+    } ],
+    "pks" : [ "id" ],
+    "fks" : null
+  } ],
+  "functions" : [ ],
+  "nativeQueries" : { }
+}
